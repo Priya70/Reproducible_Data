@@ -10,7 +10,7 @@ output:
 
 ```r
 unzip("activity.zip")
-library("dplyr")
+library(dplyr)
 ```
 
 ```
@@ -27,6 +27,7 @@ library("dplyr")
 ```
 
 ```r
+library(lattice)
 data=read.csv2("activity.csv",sep=",",header=TRUE)
 head(data)
 ```
@@ -88,7 +89,10 @@ Median Daily Steps: 10765
 
 ```r
 avg_daily_pattern=sapply(split(data$steps,data$interval),mean,na.rm=TRUE)
-plot(ts(avg_daily_pattern),type="l",col="red",ylab="Average number of steps",xlab="Time of Day")
+aa=1:288
+avg_daily_df=as.data.frame(cbind(aa,avg_daily_pattern))
+names(avg_daily_df)=c("id","avg_daily_pattern")
+xyplot(avg_daily_pattern ~ id, data =avg_daily_df ,  type = "l",xlab="interval count",ylab="average num of daily steps")
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
@@ -104,7 +108,7 @@ avg_daily_pattern[avg_daily_pattern==max(avg_daily_pattern)]
 ##      835 
 ## 206.1698
 ```
-#### As would be expected, activity level drops after 10 pm and does not pick up till 6 am. Peak activity is between 8:30-8:35 am.
+#### The activity peaks at interval 104 which corresponds to the time interval between 8:30-8:35am. As would be expected, activity level drops after 10 pm and does not pick up till 6 am. 
 
 ## Imputing missing values.
 
@@ -131,6 +135,7 @@ hist(updated_stepsSum$daily_tot,breaks=c(seq(0,25000,2500)),xlab="Total number o
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
 ```r
+data=select(data,-steps)
 imputed_mean_daily_steps=mean(updated_stepsSum$daily_tot,na.rm=TRUE)
 imputed_median_daily_steps=median(updated_stepsSum$daily_tot,na.rm=TRUE)
 cat(paste("Mean Daily Steps:", imputed_mean_daily_steps ))
@@ -146,4 +151,22 @@ Median Daily Steps: 10766.1886792453
 #### There is no differnce in the mean number of steps (which makes sense as I imputed the missing steps values with the average number of steps for that interval). There is a slight uptick in the median number of steps and now the median number of steps =mean number of daily steps.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
+#### Note: we are using the data with imputed values. First get the days of the week and then get the factor in numeric
+form
 
+```r
+#data$day=weekdays(as.Date(data$date))
+data$day_numeric=as.POSIXlt(data$date)$wday
+data=data %>% mutate(day_factor=ifelse(day_numeric==0 | day_numeric==6,1,2))
+weekend_data=filter(data,day_factor==1)
+weekday_data=filter(data,day_factor==2)
+weekday_avg_daily_pattern=sapply(split(weekday_data$updated_steps,weekday_data$interval),mean,na.rm=TRUE)
+weekend_avg_daily_pattern=sapply(split(weekend_data$updated_steps,weekend_data$interval),mean,na.rm=TRUE)
+a=1:288
+combine=as.data.frame(cbind(a,as.vector(weekday_avg_daily_pattern),as.vector(weekend_avg_daily_pattern)))
+names(combine)=c("id","weekday","weekend")
+
+xyplot(weekday + weekend ~ id, data = combine, layout = c(1,2), type = "l",xlab="interval count",ylab="average num of daily steps", outer = TRUE)
+```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
