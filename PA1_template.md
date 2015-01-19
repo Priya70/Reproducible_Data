@@ -148,11 +148,10 @@ cat(paste("Median Daily Steps:", imputed_median_daily_steps ))
 ```
 
 Median Daily Steps: 10766.1886792453
-#### There is no differnce in the mean number of steps (which makes sense as I imputed the missing steps values with the average number of steps for that interval). There is a slight uptick in the median number of steps and now the median number of steps =mean number of daily steps.  
+#### There is no difference in the mean number of steps before and after imputing -which makes sense as I imputed the missing steps values with the average number of steps for that interval. There is a slight uptick in the median number of steps and now the median number of steps =mean number of daily steps.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
-#### Note: we are using the data with imputed values. First get the days of the week and then get the factor in numeric
-form
+#### Note: we are using the data with imputed values. First get the days of the week and then get the factor in numeric form.
 
 ```r
 #data$day=weekdays(as.Date(data$date))
@@ -165,8 +164,8 @@ weekend_avg_daily_pattern=sapply(split(weekend_data$updated_steps,weekend_data$i
 a=1:288
 combine=as.data.frame(cbind(a,as.vector(weekday_avg_daily_pattern),as.vector(weekend_avg_daily_pattern)))
 names(combine)=c("id","weekday","weekend")
-
 xyplot(weekday + weekend ~ id, data = combine, layout = c(1,2), type = "l",xlab="interval count",ylab="average num of daily steps", outer = TRUE)
 ```
 
 ![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+#### There are slight differnces in the activity pattern between weekday and weekends. The morning peak activity time has higher number of steps on weekends that weekdays. The overall activity during the day (apart from the mornign hrs) is more during weekdays than weekends.
